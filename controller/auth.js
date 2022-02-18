@@ -15,8 +15,8 @@ const authenticateToken = (req, res, next) => {
     }
     req.body = Object.assign(req.body, user);
     next();
-  })
-}
+  });
+};
 
 const refreshToken = (req, res) => {
   const authHeader = req.headers['authorization'];
@@ -30,23 +30,24 @@ const refreshToken = (req, res) => {
       res.sendStatus(401);
     }
     User.findById(data.user._id, (err, user) => {
-      if(err) 
+      if (err) {
         throw new Error(err);
-      if(user){
+      }
+      if (user) {
         res.send({accessToken: generateAccessToken(user)});
       }
-    })
+    });
   });
 };
 
 
 const generateAccessToken = (user) => {
   return jwt.sign({user}, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '1y'});
-} 
+};
 
 const generateRefreshToken = (user) => {
   return jwt.sign({user}, process.env.REFRESH_TOKEN_SECRET, {expiresIn: '1y'});
-}
+};
 
 
 module.exports = {
@@ -54,4 +55,4 @@ module.exports = {
   authenticateToken,
   refreshToken,
   generateRefreshToken,
-}
+};

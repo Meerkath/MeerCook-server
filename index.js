@@ -1,10 +1,10 @@
-const express = require('express')
-const recipes = require('./routes/recipes')
-const app = express()
+const express = require('express');
+const recipes = require('./routes/recipes');
+const app = express();
 
-app.use('/meercook-server/recipes', recipes)
-app.get('/meercook-server', function (req, res) {
+app.use('/meercook-server/recipes', recipes);
+app.get('/meercook-server', (req, res) => {
   console.log('hello');
-  res.send("hello")
-})
-app.listen(3000)
+  res.send('hello');
+});
+app.listen(3000);
