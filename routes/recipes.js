@@ -1,7 +1,7 @@
-import express from 'express'
+const express = require('express')
 const router = express.Router()
-import { getRecipes } from '../controller/recipeController.js'
+const getRecipes = require('../controller/recipeController.js')
 
 router.get('/', getRecipes);
 
-export default router;
+module.exports = router;

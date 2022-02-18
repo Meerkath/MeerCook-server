@@ -1,4 +1,4 @@
-import { getAllRecipes } from '../model/recipeModel.js'
-export async function getRecipes(req, res) {
+const getAllRecipes = require('../model/recipeModel.js')
+module.exports = async function getRecipes(req, res) {
     res.send(await getAllRecipes())
 }
