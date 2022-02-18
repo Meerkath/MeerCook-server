@@ -4,6 +4,4 @@ const app = express()
 
 app.use('/recipes', recipes)
 
-app.listen(80, () => {
-  console.log("OK -- Server Started")
-})
+app.listen()
