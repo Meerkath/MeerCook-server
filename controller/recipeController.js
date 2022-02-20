@@ -1,4 +1,6 @@
-const getAllRecipes = require('../model/recipeModel.js');
-module.exports = async function getRecipes(req, res) {
-  res.send(await getAllRecipes());
+const {getRecipesByUserId} = require('../model/recipeModel.js');
+module.exports = {
+  getRecipes: async (_req, res) => {
+    res.send(await getRecipesByUserId(res.locals.user.id));
+  },
 };

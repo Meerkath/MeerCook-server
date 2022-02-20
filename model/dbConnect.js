@@ -1,6 +1,4 @@
 const mysql = require('mysql2/promise');
-const dotenv = require('dotenv');
-dotenv.config();
 
 module.exports = {
   getConnection: async () => {
@@ -8,7 +6,7 @@ module.exports = {
       host: process.env.DB_IP,
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
-      database: 'meerkath_MeerkCook',
+      database: 'meerkath_MeerCook',
     });
     return connection;
   },
