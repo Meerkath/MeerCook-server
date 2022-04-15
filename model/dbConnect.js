@@ -1,4 +1,4 @@
-const mysql = require('mysql2/promise');
+const mysql = require('mysql2/promise')
 
 module.exports = {
   getConnection: async () => {
@@ -7,7 +7,7 @@ module.exports = {
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       database: 'meerkath_MeerCook',
-    });
-    return connection;
+    })
+    return connection
   },
-};
+}
