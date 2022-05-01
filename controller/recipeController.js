@@ -1,7 +1,8 @@
 const fs = require('fs')
 const path = require('path')
-const { getIngredientsByRecipeId } = require('../model/ingredient.js')
-const {getAllByUserId, saveOrReplace, deleteRecipeById, getRecipeById} = require('../model/recipeModel.js')
+const { getStepsByRecipeId } = require('../model/stepModel.js')
+const { getIngredientsByRecipeId } = require('../model/ingredientModel.js')
+const { getAllByUserId, saveOrReplace, deleteRecipeById, getRecipeById } = require('../model/recipeModel.js')
 
 module.exports = {
   getAllRecipes: async (_req, res) => {
@@ -72,7 +73,7 @@ module.exports = {
     res.sendStatus(200)
   },
 
-  getRecipeDetails: async (req, res) => {
+  getRecipeIngredients: async (req, res) => {
     if(!req.params.recipeId){
       res.status(400).send('Please provide recipeId attribute.'); return
     }
@@ -84,6 +85,21 @@ module.exports = {
       res.status(403).send('You are not authorized to view this recipe'); return
     }
     recipe.ingredients = await getIngredientsByRecipeId(recipe.id)
+    res.status(200).send(recipe)
+  },
+  
+  getRecipeSteps: async (req, res) => {
+    if(!req.params.recipeId){
+      res.status(400).send('Please provide recipeId attribute.'); return
+    }
+    const recipe = await getRecipeById(req.params.recipeId)
+    if(!recipe){
+      res.status(404).send('Recipe not found.'); return
+    }
+    if(recipe.userId !== res.locals.user.id){
+      res.status(403).send('You are not authorized to view this recipe'); return
+    }
+    recipe.steps = await getStepsByRecipeId(recipe.id)
     res.status(200).send(recipe)
   }
 }
