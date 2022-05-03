@@ -1,8 +1,8 @@
 const fs = require('fs')
 const path = require('path')
-const { getStepsByRecipeId } = require('../model/stepModel.js')
-const { getIngredientsByRecipeId } = require('../model/ingredientModel.js')
-const { getAllByUserId, saveOrReplace, deleteRecipeById, getRecipeById } = require('../model/recipeModel.js')
+const { getStepsByRecipeId, saveOrReplaceStep, getStepById, deleteStepsByRecipeId } = require('../model/stepModel.js')
+const { getIngredientsByRecipeId, saveOrReplaceIngredient, getIngredientById, deleteIngredientsByRecipeId } = require('../model/ingredientModel.js')
+const { getAllByUserId, saveOrReplaceRecipe, deleteRecipeById, getRecipeById } = require('../model/recipeModel.js')
 
 module.exports = {
   getAllRecipes: async (_req, res) => {
@@ -44,19 +44,69 @@ module.exports = {
     if (!req.body.recipe.title) {
       res.status(400).send('Please provide title attribute.'); return
     }
-    const recipe = req.body.recipe
-    recipe.userId = res.locals.user.id
-    if(await saveOrReplace(recipe)) {
-      res.sendStatus(200)
-    }else{
-      res.sendStatus(500)
+    if (!req.body.recipe.ingredients){
+      res.status(400).send('Please provide ingredients attribute.'); return
     }
+    if (!req.body.recipe.steps){
+      res.status(400).send('Please provide steps attribute.'); return
+    }
+    let recipe = req.body.recipe
+    recipe.userId = res.locals.user.id
+    const foundRecipe = await getRecipeById(recipe.id)
+    if (recipe.id && !foundRecipe) {
+      res.status(404).send({message: 'Recipe not found.'}); return
+    }
+    if(recipe.id && foundRecipe.userId !== res.locals.user.id){
+      res.status(403).send({message: 'You are not authorized to edit this recipe.'}); return
+    }
+    const insertId = await saveOrReplaceRecipe(recipe)
+    const recipeId = recipe.id || insertId
+    if(insertId === false) {
+      res.status(500).send({message: 'Could not save or replace recipe.', recipe}); return
+    }
+    for (const step of req.body.recipe.steps) {
+      step.recipeId = recipeId
+      if(!req.body.recipe.id && step.id) {
+        res.status(400).send({ message: 'Don\'t specify step id if it is a new recipe.', step }); return
+      }
+      if(step.id) {
+        const foundStep = await getStepById(step.id)
+        if(!foundStep) {
+          res.status(404).send({ message: 'Could not find step with id ' + step.id + '.' }); return
+        }
+        if(foundStep.recipeId !== recipeId) {
+          res.status(400).send({ message: 'Step with id ' + step.id + ' is not part of recipe with id ' + recipeId + '.'}); return
+        }
+      }
+      if(!(await saveOrReplaceStep(step))) {
+        res.status(500).send({ message: 'Could not save or replace step.', step }); return
+      }
+    }
+    for (const ingredient of req.body.recipe.ingredients) {
+      ingredient.recipeId = recipeId
+      if(!req.body.recipe.id && ingredient.id) {
+        res.status(400).send({message: 'Don\'t specify ingredient id if it is a new recipe.', ingredient}); return
+      }
+      if(ingredient.id){
+        const foundIngredient = await getIngredientById(ingredient.id)
+        if(!foundIngredient) {
+          res.status(404).send({ message: 'Could not find ingredient with id ' + ingredient.id + '.' }); return
+        }
+        if(foundIngredient.recipeId !== recipeId) {
+          res.status(400).send({ messsage: 'Ingredient with id ' + ingredient.id + ' is not part of recipe with id ' + recipeId + '.'}); return
+        }
+      }
+      if(!(await saveOrReplaceIngredient(ingredient))) {
+        res.status(500).send({ message: 'Could not save or replace ingredient.', ingredient }); return
+      }
+    }
+    res.status(201).send({ message: 'Recipe saved or replaced.', recipeId })
   },
 
   deleteRecipe: async (req, res) => {
     if (!req.params.recipeId) {
       res.status(400)
-        .send('Please provide recipeId attribute.'); return
+        .send({message: 'Please provide recipeId attribute.'}); return
     }
     let recipeToDelete = await getRecipeById(req.params.recipeId)
     if(!recipeToDelete) {
@@ -65,17 +115,23 @@ module.exports = {
     }
     if(recipeToDelete.userId !== res.locals.user.id) {
       res.status(403)
-        .send('You are not allowed to delete this recipe.'); return
+        .send({message: 'You are not allowed to delete this recipe.'}); return
     }
     if(!(await deleteRecipeById(req.params.recipeId))) {
-      res.sendStatus(500)
+      res.sendStatus({message: 'Could not delete recipe.'}); return
+    }
+    if(!(await deleteStepsByRecipeId(req.params.recipeId))) {
+      res.sendStatus({message: 'Could not delete steps.'}); return
+    }
+    if(!(await deleteIngredientsByRecipeId(req.params.recipeId))) {
+      res.sendStatus({message: 'Could not delete ingredients.'}); return
     }
     res.sendStatus(200)
   },
 
   getRecipeIngredients: async (req, res) => {
     if(!req.params.recipeId){
-      res.status(400).send('Please provide recipeId attribute.'); return
+      res.status(400).send({ message: 'Please provide recipeId attribute.'}); return
     }
     const recipe = await getRecipeById(req.params.recipeId)
     if(!recipe){

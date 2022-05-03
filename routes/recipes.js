@@ -9,6 +9,6 @@ router.get('/:recipeId', authenticateToken, getRecipe)
 router.get('/:recipeId/ingredients', authenticateToken, getRecipeIngredients)
 router.get('/:recipeId/steps', authenticateToken, getRecipeSteps)
 router.post('/save', authenticateToken, saveRecipe)
-router.post('/delete/:recipeId', authenticateToken, deleteRecipe)
+router.delete('/delete/:recipeId', authenticateToken, deleteRecipe)
 
 module.exports = router

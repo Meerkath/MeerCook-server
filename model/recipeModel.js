@@ -10,7 +10,7 @@ module.exports = {
     connection.close()
     return recipes
   },
-  saveOrReplace: async (recipe) => {
+  saveOrReplaceRecipe: async (recipe) => {
     const connection = await getConnection()
     let sql = 'INSERT INTO recipe(id, userId, title, description) VALUES (' + (recipe.id ? '?' : 'default') + ', ?, ?, ?) ON DUPLICATE KEY UPDATE title = ?, description = ?'
     let values = [
@@ -23,12 +23,12 @@ module.exports = {
     ]
     !recipe.id && values.shift()
     try{
-      await connection.execute(
+      const [result] = await connection.execute(
         sql,
         values,
       )
       connection.close()
-      return true
+      return result.insertId
     }
     catch(e){
       console.error(`Could not save or replace recipe : ${e.message}`)
