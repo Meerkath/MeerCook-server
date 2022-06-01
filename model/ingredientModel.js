@@ -8,34 +8,34 @@ module.exports = {
         'SELECT * FROM ingredient WHERE recipeId = ?',
         [recipeId],
       )
-      connection.close()
+      
       return ingredients
     }catch(e){
       console.error(`Could not get ingredients by recipe id : ${e.message}`)
-      connection.close()
+      
       return false
     }
   },
-  saveOrReplaceIngredient: async (ingredient) => {
+  saveIngredients: async (recipeId, ingredients) => {
     const connection = await getConnection()
     try{
-      const sql = 'INSERT INTO ingredient(id, recipeId, text) VALUES (' + (ingredient.id ? '?' : 'default') + ', ?, ?) ON DUPLICATE KEY UPDATE text = ?'
-      let values = [
-        ingredient.id,
-        ingredient.recipeId,
-        ingredient.text || null,
-        ingredient.text || null,
-      ]
-      !ingredient.id && values.shift() 
+      let sql = 'INSERT INTO ingredient(recipeId, text) VALUES'
+      let values = []
+      ingredients.forEach((ingredient) => {
+        sql += '(?, ?),'
+        values.push(recipeId, ingredient.text)
+      })
+      // Removing trailing coma
+      sql = sql.replace(/,+$/, '')
       await connection.execute(
         sql,
         values
       )
-      connection.close()
+      
       return true
     }catch(e){
-      console.error(`Could not save or replace ingredient : ${e.message}`)
-      connection.close()
+      console.error(`Could not save ingredient : ${e.message}`)
+      
       return false
     }
   },
@@ -46,11 +46,11 @@ module.exports = {
         'SELECT * FROM ingredient WHERE id = ?',
         [ingredientId],
       )
-      connection.close()
+      
       return ingredient[0]
     }catch(e){
       console.error(`Could not get ingredient by id : ${e.message}`)
-      connection.close()
+      
       return false
     }
   },
@@ -61,11 +61,11 @@ module.exports = {
         'DELETE FROM ingredient WHERE recipeId = ?',
         [recipeId],
       )
-      connection.close()
+      
       return true
     }catch(e){
       console.error(`Could not delete ingredient by recipe id : ${e.message}`)
-      connection.close()
+      
       return false
     }
   }

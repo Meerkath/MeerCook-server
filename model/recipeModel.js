@@ -7,7 +7,7 @@ module.exports = {
       'SELECT * FROM recipe WHERE userId = ?',
       [userId],
     )
-    connection.close()
+    
     return recipes
   },
   saveOrReplaceRecipe: async (recipe) => {
@@ -27,12 +27,12 @@ module.exports = {
         sql,
         values,
       )
-      connection.close()
+      
       return result.insertId
     }
     catch(e){
       console.error(`Could not save or replace recipe : ${e.message}`)
-      connection.close()
+      
       return false
     }
   },
@@ -43,11 +43,11 @@ module.exports = {
         'DELETE FROM recipe WHERE id = ?',
         [recipeId],
       )
-      connection.close()
+      
       return true
     }catch(e){
       console.error(`Could not delete recipe : ${e.message}`)
-      connection.close()
+      
       return false
     }
   },
@@ -58,11 +58,11 @@ module.exports = {
         'SELECT * FROM recipe WHERE id = ?',
         [recipeId],
       )
-      connection.close()
+      
       return recipe[0]
     }catch(e){
       console.error(`Could not get recipe by id : ${e.message}`)
-      connection.close()
+      
       return false
     }
   }

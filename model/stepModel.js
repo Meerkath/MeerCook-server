@@ -8,35 +8,34 @@ module.exports = {
         'SELECT * FROM step WHERE recipeId = ?',
         [recipeId],
       )
-      connection.close()
+      
       return steps
     }catch(e){
       console.error(`Could not get steps by recipe id : ${e.message}`)
-      connection.close()
+      
       return false
     }
   },
-  saveOrReplaceStep: async (step) => {
+  saveSteps: async (recipeId, steps) => {
     const connection = await getConnection()
     try{
-      const sql = 'INSERT INTO step(id, recipeId, text, sortId) VALUES (' + (step.id ? '?' : 'default') + ', ?, ?, ?) ON DUPLICATE KEY UPDATE text = ?'
-      let values = [
-        step.id,
-        step.recipeId,
-        step.text || null,
-        step.sortId,
-        step.text || null,
-      ]
-      !step.id && values.shift() 
+      let sql = 'INSERT INTO step(recipeId, text, sortId) VALUES'
+      let values = []
+      steps.forEach((step) => {
+        sql += '(?, ?, ?),'
+        values.push(recipeId, step.text, step.sortId)
+      })
+      // Removing trailing coma
+      sql = sql.replace(/,+$/, '')
       await connection.execute(
         sql,
         values
       )
-      connection.close()
+      
       return true
     }catch(e){
       console.error(`Could not save or replace step : ${e.message}`)
-      connection.close()
+      
       return false
     }
   },
@@ -47,11 +46,11 @@ module.exports = {
         'SELECT * FROM step WHERE id = ?',
         [stepId],
       )
-      connection.close()
+      
       return step[0]
     }catch(e){
       console.error(`Could not get step by id : ${e.message}`)
-      connection.close()
+      
       return false
     }
   },
@@ -62,11 +61,11 @@ module.exports = {
         'DELETE FROM step WHERE recipeId = ?',
         [recipeId],
       )
-      connection.close()
+      
       return true
     }catch(e){
       console.error(`Could not delete steps by recipe id : ${e.message}`)
-      connection.close()
+      
       return false
     }
   }
