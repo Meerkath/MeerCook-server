@@ -7,7 +7,7 @@ module.exports = {
       'SELECT * FROM recipe WHERE userId = ?',
       [userId],
     )
-    
+    await connection.end()
     return recipes
   },
   saveOrReplaceRecipe: async (recipe) => {
@@ -17,9 +17,9 @@ module.exports = {
       recipe.id,
       recipe.userId,
       recipe.title,
-      recipe.description || null,
+      recipe.description || '',
       recipe.title,
-      recipe.description || null,
+      recipe.description || '',
     ]
     !recipe.id && values.shift()
     try{
@@ -27,12 +27,11 @@ module.exports = {
         sql,
         values,
       )
-      
+      await connection.end()
       return result.insertId
     }
     catch(e){
       console.error(`Could not save or replace recipe : ${e.message}`)
-      
       return false
     }
   },
@@ -43,11 +42,11 @@ module.exports = {
         'DELETE FROM recipe WHERE id = ?',
         [recipeId],
       )
-      
+      await connection.end()
       return true
     }catch(e){
       console.error(`Could not delete recipe : ${e.message}`)
-      
+      await connection.end()
       return false
     }
   },
@@ -58,11 +57,11 @@ module.exports = {
         'SELECT * FROM recipe WHERE id = ?',
         [recipeId],
       )
-      
+      await connection.end()
       return recipe[0]
     }catch(e){
       console.error(`Could not get recipe by id : ${e.message}`)
-      
+      await connection.end()
       return false
     }
   }

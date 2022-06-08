@@ -54,16 +54,18 @@ module.exports = {
       }
     }
     recipe.userId = res.locals.user.id
-    if(saveOrReplaceRecipe(recipe)) {
-      res.sendStatus(200)
+    const insertId = await saveOrReplaceRecipe(recipe)
+    if(insertId) {
+      res.send({'insertId': insertId})
     } else {
       res.sendStatus(500)
     }
   },
 
   saveRecipeIngredients: async (req, res) => {
+    
     const recipeId = req.params.recipeId
-    const ingredients = req.body.ingredients
+    const ingredients = JSON.parse(req.body.ingredients)
     if(!recipeId) {
       res.status(400)
         .send('Please provide recipeId attribute.'); return
@@ -79,7 +81,7 @@ module.exports = {
     if(existingRecipe.userId !== res.locals.user.id) {
       res.status(403).send('You are not authorized to edit this recipe'); return
     }
-    await deleteIngredientsByRecipeId(recipeId)
+    deleteIngredientsByRecipeId(recipeId)
     for (const ingredient of ingredients) {
       if(!ingredient.text) {
         res.status(400)

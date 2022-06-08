@@ -2,17 +2,17 @@ const {getConnection} = require('./dbConnect.js')
 
 module.exports = {
   getIngredientsByRecipeId: async (recipeId) => {
+    const connection = await getConnection()
     try{
-      const connection = await getConnection()
       const [ingredients] = await connection.execute(
         'SELECT * FROM ingredient WHERE recipeId = ?',
         [recipeId],
       )
-      
+      await connection.end()
       return ingredients
     }catch(e){
+      await connection.end()
       console.error(`Could not get ingredients by recipe id : ${e.message}`)
-      
       return false
     }
   },
@@ -31,10 +31,12 @@ module.exports = {
         sql,
         values
       )
+      await connection.end()
       
       return true
     }catch(e){
       console.error(`Could not save ingredient : ${e.message}`)
+      await connection.end()
       
       return false
     }
@@ -46,10 +48,12 @@ module.exports = {
         'SELECT * FROM ingredient WHERE id = ?',
         [ingredientId],
       )
+      await connection.end()
       
       return ingredient[0]
     }catch(e){
       console.error(`Could not get ingredient by id : ${e.message}`)
+      await connection.end()
       
       return false
     }
@@ -61,10 +65,14 @@ module.exports = {
         'DELETE FROM ingredient WHERE recipeId = ?',
         [recipeId],
       )
+      await connection.end()
+      
       
       return true
     }catch(e){
       console.error(`Could not delete ingredient by recipe id : ${e.message}`)
+      await connection.end()
+      
       
       return false
     }

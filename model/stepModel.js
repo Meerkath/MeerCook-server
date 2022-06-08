@@ -8,11 +8,11 @@ module.exports = {
         'SELECT * FROM step WHERE recipeId = ?',
         [recipeId],
       )
-      
+      await connection.end()
       return steps
     }catch(e){
       console.error(`Could not get steps by recipe id : ${e.message}`)
-      
+      await connection.end()
       return false
     }
   },
@@ -31,11 +31,11 @@ module.exports = {
         sql,
         values
       )
-      
+      await connection.end()
       return true
     }catch(e){
       console.error(`Could not save or replace step : ${e.message}`)
-      
+      await connection.end()
       return false
     }
   },
@@ -46,11 +46,11 @@ module.exports = {
         'SELECT * FROM step WHERE id = ?',
         [stepId],
       )
-      
+      await connection.end()
       return step[0]
     }catch(e){
       console.error(`Could not get step by id : ${e.message}`)
-      
+      await connection.end()
       return false
     }
   },
@@ -61,11 +61,11 @@ module.exports = {
         'DELETE FROM step WHERE recipeId = ?',
         [recipeId],
       )
-      
+      await connection.end()
       return true
     }catch(e){
       console.error(`Could not delete steps by recipe id : ${e.message}`)
-      
+      await connection.end()
       return false
     }
   }
