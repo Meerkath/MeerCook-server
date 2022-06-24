@@ -118,7 +118,7 @@ module.exports = {
     await deleteStepsByRecipeId(recipeId)
     const sortIdList = []
     for (const step of steps) {
-      if(!step.text) {
+      if(!step.text && step.text !== '') {
         res.status(400)
           .send('Please provide step\'s text attribute.'); return
       }
