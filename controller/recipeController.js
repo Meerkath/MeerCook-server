@@ -63,7 +63,6 @@ module.exports = {
   },
 
   saveRecipeIngredients: async (req, res) => {
-    
     const recipeId = req.params.recipeId
     const ingredients = JSON.parse(req.body.ingredients)
     if(!recipeId) {
@@ -81,12 +80,15 @@ module.exports = {
     if(existingRecipe.userId !== res.locals.user.id) {
       res.status(403).send('You are not authorized to edit this recipe'); return
     }
-    deleteIngredientsByRecipeId(recipeId)
     for (const ingredient of ingredients) {
       if(!ingredient.text) {
         res.status(400)
           .send('Please provide ingredient\'s text attribute.'); return
       }
+    }
+    await deleteIngredientsByRecipeId(recipeId)
+    if(ingredients.length === 0) {
+      res.sendStatus(200); return
     }
     if(await saveIngredients(recipeId, ingredients)) {
       res.sendStatus(200)
@@ -97,7 +99,7 @@ module.exports = {
   
   saveRecipeSteps: async (req, res) => {
     const recipeId = req.params.recipeId
-    const steps = req.body.steps
+    const steps = JSON.parse(req.body.steps)
     if(!recipeId) {
       res.status(400)
         .send('Please provide recipeId attribute.'); return
@@ -128,6 +130,7 @@ module.exports = {
         res.status(400)
           .send('Please make sure step\'s sortId attribute is unique.'); return
       }
+      sortIdList.push(step.sortId)
     }
     if(await saveSteps(recipeId, steps)) {
       res.sendStatus(200)
